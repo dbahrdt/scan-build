@@ -132,6 +132,13 @@ def validate_args_for_analyze(parser, args, from_build_command):
     elif not from_build_command and not os.path.exists(args.cdb):
         parser.error(message='compilation database is missing')
 
+    for x in prepend_compile_flags:
+        if not os.path.exists(x):
+            parser.error(message='File {} does not exist but should be used to prepend to compile flags'.format(x))
+
+    for x in append_compile_flags:
+        if not os.path.exists(x):
+            parser.error(message='File {} does not exist but should be used to append to compile flags'.format(x))
 
 def create_intercept_parser():
     # type: () -> argparse.ArgumentParser
@@ -193,6 +200,22 @@ def create_analyze_parser(from_build_command):
         help="""Do not run static analyzer against files found in this
         directory. (You can specify this option multiple times.)
         Could be useful when project contains 3rd party libraries.""")
+
+    parser.add_argument(
+        '--prepend-compile-flags',
+        metavar='<file>',
+        dest='prepend_compile_flags',
+        action='append',
+        default=[],
+        help="""Prepend compile flags to the parsed compile flags before executing the actual analysis.""")
+
+    parser.add_argument(
+        '--append-compile-flags',
+        metavar='<file>',
+        dest='append_compile_flags',
+        action='append',
+        default=[],
+        help="""Append compile flags to the parsed compile flags before executing the actual analysis.""")
 
     output = parser.add_argument_group('output control options')
     output.add_argument(

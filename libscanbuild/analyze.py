@@ -156,6 +156,13 @@ def analyze_parameters(args):
 
         return prefix_with('-Xclang', result)
 
+    def unpack_flags(filelist):
+        result = []
+        for fn in filelist:
+            with open(fn) as f:
+                result += [x in f]
+        return result
+
     return {
         'clang': args.clang,
         'output_dir': args.output,
@@ -164,7 +171,9 @@ def analyze_parameters(args):
         'direct_args': direct_args(args),
         'analyzer_target': args.analyzer_target,
         'force_debug': args.force_debug,
-        'excludes': args.excludes
+        'excludes': args.excludes,
+        'prepend-flags': [] if len(args.prepend_compile_flags) == 0 else unpack_flags(args.prepend_compile_flags),
+        'append-flags': [] if len(args.append_compile_flags) == 0 else unpack_flags(args.append_compile_flags)
     }
 
 
@@ -303,7 +312,7 @@ def run(opts):
     decorator. It's like an 'assert' to check the contract between the
     caller and the called method.) """
 
-    command = [opts['compiler'], '-c'] + opts['flags'] + [opts['source']]
+    command = [opts['compiler'], '-c'] + opts['prepend-flags'] + opts['flags'] + opts['append-flags'] + [opts['source']]
     logging.debug("Run analyzer against '%s'", command)
     return exclude(opts)
 
@@ -356,8 +365,8 @@ def report_failure(opts):
     # Execute Clang again, but run the syntax check only.
     try:
         cwd = opts['directory']
-        cmd = get_arguments([opts['clang'], '-fsyntax-only', '-E'] +
-                            opts['flags'] + [opts['source'], '-o', name], cwd)
+        cmd = get_arguments([opts['clang'], '-fsyntax-only', '-E'] + opts['prepend-flags'] +
+                            opts['flags'] + opts['append-flags'] + [opts['source'], '-o', name], cwd)
         run_command(cmd, cwd=cwd)
         # write general information about the crash
         with open(name + '.info.txt', 'w') as handle:
@@ -398,7 +407,10 @@ def run_analyzer(opts, continuation=report_failure):
     try:
         cwd = opts['directory']
         cmd = get_arguments([opts['clang'], '--analyze'] +
-                            opts['direct_args'] + opts['flags'] +
+                            opts['direct_args'] +
+                            opts['prepend-flags'] +
+                            opts['flags'] +
+                            opts['append-flags'] +
                             [opts['source'], '-o', target()],
                             cwd)
         output = run_command(cmd, cwd=cwd)
