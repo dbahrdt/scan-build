@@ -132,11 +132,11 @@ def validate_args_for_analyze(parser, args, from_build_command):
     elif not from_build_command and not os.path.exists(args.cdb):
         parser.error(message='compilation database is missing')
 
-    for x in prepend_compile_flags:
+    for x in args.prepend_compile_flags:
         if not os.path.exists(x):
             parser.error(message='File {} does not exist but should be used to prepend to compile flags'.format(x))
 
-    for x in append_compile_flags:
+    for x in args.append_compile_flags:
         if not os.path.exists(x):
             parser.error(message='File {} does not exist but should be used to append to compile flags'.format(x))
 

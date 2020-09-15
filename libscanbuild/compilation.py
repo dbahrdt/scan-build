@@ -59,7 +59,7 @@ IGNORED_FLAGS = {
     # consider moving visual studio specific warning flags also
     '-nologo': 0,
     '-EHsc': 0,
-    '-EHa': 0
+    '-EHa': 0,
     # Flags not support by clang
     '-fstrict-volatile-bitfields': 0,
     '-mlongcalls' : 0

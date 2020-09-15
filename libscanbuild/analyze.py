@@ -160,7 +160,7 @@ def analyze_parameters(args):
         result = []
         for fn in filelist:
             with open(fn) as f:
-                result += [x in f]
+                result += [x.rstrip() for x in f]
         return result
 
     return {
